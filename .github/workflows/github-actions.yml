@@ -1,4 +1,4 @@
-name: Social API
+name: Social API CI Workflow
 
 on: [push]
 
