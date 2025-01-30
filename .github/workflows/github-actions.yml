@@ -1,10 +1,11 @@
 name: Social API CI Workflow
 
-on:
-  push:
-    branches:
-      - master
-
+on: [push]
+# attempt to fix branch protection, TODO: Fix later if time available
+#on:
+#  push:
+#    branches:
+#      - master
 jobs:
   test:
     runs-on: ubuntu-latest
