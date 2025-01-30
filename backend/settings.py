@@ -75,8 +75,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'social-db',
+        'USER': 'postgres',
+        'PASSWORD': 'FDS51bgghf^%$',
+        'HOST': 'social-db.cv68cam4wbqj.us-east-2.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
 
