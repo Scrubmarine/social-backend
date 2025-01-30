@@ -8,11 +8,11 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14
+        image: postgres:16
         env:
-          POSTGRES_USER: social_admin
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: social_db
+          POSTGRES_USER: test_admin
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: test_social_db
         ports:
           - 5432:5432
         options: >-
