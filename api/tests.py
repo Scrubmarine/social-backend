@@ -6,7 +6,7 @@ from django.urls import reverse
 
 class UserTests(APITestCase):
     def test_create_user(self):
-        url = reverse('users')  # reverse looks up the view name
+        url = reverse('create-user')  # reverse looks up the view name
         data = {  # test data to create a user
             'username': 'testuser',
             'email': 'test@test.com',
