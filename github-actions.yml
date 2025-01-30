@@ -1,0 +1,45 @@
+name: Social API
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: social_admin
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: social_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health_cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+          DATABASE_URL: postgres://test_user:test_pass@localhost:5432/test_db
+          DJANGO_SETTINGS_MODULE: myproject.settings_test
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run migrations
+        run: python manage.py migrate
+
+      - name: Run tests
+        run: python manage.py test
