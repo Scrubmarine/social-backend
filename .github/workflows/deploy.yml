@@ -23,19 +23,35 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: 'us-east-1'
-#TEST
+    - name: Install AWS CLI
+      run: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+        aws --version  # Verify installation
+
+    - name: Check AWS CLI version
+      run: aws --version
+
+    - name: Configure AWS CLI
+      run: |
+        aws configure set region 'us-east-1'
+        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+
     - name: Deploy to Elastic Beanstalk
       env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'us-east-1'
         APPLICATION_NAME: 'Social Backend'
         ENVIRONMENT_NAME: 'social-backend'
       run: |
-        # Initialize Elastic Beanstalk environment
-        eb init $APPLICATION_NAME --region us-east-1
+        # Initialize Elastic Beanstalk
+        eb init $APPLICATION_NAME --region $AWS_REGION
+
+        # Select environment
         eb use $ENVIRONMENT_NAME
+
+        # Deploy the application
         eb deploy
