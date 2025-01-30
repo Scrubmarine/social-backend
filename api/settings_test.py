@@ -11,6 +11,5 @@ DATABASES = {
     }
 }
 
-# You may also want to disable logging, enable Django's testing tools, etc.
 DEBUG = True
 TESTING = True
