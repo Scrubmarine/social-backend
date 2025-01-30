@@ -3,13 +3,16 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
 
+
 class UserTests(APITestCase):
     def test_create_user(self):
-        url = reverse('users') # reverse looks up the view name
-        data = { # test data to create a user
+        url = reverse('users')  # reverse looks up the view name
+        data = {  # test data to create a user
             'username': 'testuser',
             'email': 'test@test.com',
-            'password': 'testpassword'
+            'password': 'testpassword',
+            'first_name': 'testfirst',
+            'last_name': 'testlast'
         }
 
         response = self.client.post(url, data, format='json')
@@ -17,5 +20,7 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['username'], data['username'])
         self.assertEqual(response.data['email'], data['email'])
+        self.assertEqual(response.data['first_name'], data['first_name'])
+        self.assertEqual(response.data['last_name'], data['last_name'])
         # ensure password isn't returned
         self.assertNotIn('password', response.data)
