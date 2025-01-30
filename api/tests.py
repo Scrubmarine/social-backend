@@ -21,6 +21,6 @@ class UserTests(APITestCase):
         self.assertEqual(response.data['username'], data['username'])
         self.assertEqual(response.data['email'], data['email'])
         self.assertEqual(response.data['first_name'], data['first_name'])
-        self.assertEqual(response.data['last_name'], data['last_name'])
+        self.assertEqual(response.data['last_name'], 'failing case')
         # ensure password isn't returned
         self.assertNotIn('password', response.data)
