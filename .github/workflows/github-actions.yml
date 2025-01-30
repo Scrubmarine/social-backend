@@ -15,11 +15,6 @@ jobs:
           POSTGRES_DB: test_social_db
         ports:
           - 5432:5432
-        options: >-
-          --health_cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     env:
           DATABASE_URL: postgres://test_admin:testpassword@localhost:5432/test_social_db
