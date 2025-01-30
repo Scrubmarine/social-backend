@@ -41,8 +41,8 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        APPLICATION_NAME: 'Social_Backend'
-        ENVIRONMENT_NAME: 'social-backend'
+        APPLICATION_NAME: 'social-backend'
+        ENVIRONMENT_NAME: 'Social-backend-env'
       run: |
         # Initialize Elastic Beanstalk (non-interactive)
         eb init $APPLICATION_NAME \
