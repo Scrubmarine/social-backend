@@ -51,3 +51,4 @@ jobs:
           --no-verify-ssl  
         eb use $ENVIRONMENT_NAME
         eb deploy
+#test
