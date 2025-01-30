@@ -1,6 +1,9 @@
 name: Social API CI Workflow
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   test:
