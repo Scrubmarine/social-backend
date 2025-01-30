@@ -46,9 +46,6 @@ jobs:
       run: |
         # Initialize Elastic Beanstalk
         eb init $APPLICATION_NAME --region $AWS_REGION
-
-        # Select environment
         eb use $ENVIRONMENT_NAME
-
-        # Deploy the application
         eb deploy
+# test
