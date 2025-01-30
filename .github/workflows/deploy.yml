@@ -21,7 +21,20 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt  # This installs awscli along with your other dependencies
+        pip install -r requirements.txt
+
+    - name: Install EB CLI
+      run: |
+        pip install awsebcli
+
+    - name: Check AWS CLI version
+      run: aws --version
+
+    - name: Configure AWS CLI
+      run: |
+        aws configure set region 'us-east-1'
+        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
 
     - name: Deploy to Elastic Beanstalk
       env:
@@ -31,11 +44,11 @@ jobs:
         APPLICATION_NAME: 'Social Backend'
         ENVIRONMENT_NAME: 'social-backend'
       run: |
-        # Configure AWS CLI
-        aws configure set region $AWS_REGION
-        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-        # Package the app and deploy it to Elastic Beanstalk
+        # Initialize Elastic Beanstalk
         eb init $APPLICATION_NAME --region $AWS_REGION
+
+        # Select environment
         eb use $ENVIRONMENT_NAME
+
+        # Deploy the application
         eb deploy
