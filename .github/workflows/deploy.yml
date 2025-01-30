@@ -45,7 +45,7 @@ jobs:
         ENVIRONMENT_NAME: 'social-backend'
       run: |
         # Initialize Elastic Beanstalk
-        eb init $APPLICATION_NAME --region $AWS_REGION
+        eb init $APPLICATION_NAME --region $AWS_REGION --no-interactive
         eb use $ENVIRONMENT_NAME
         eb deploy
 # test
