@@ -225,6 +225,7 @@ class PostTests(APITestCase):
     def test_get_post(self):
         user_url = reverse('create-user')
         post_url = reverse('create-post')
+        get_post_url = reverse('get-post', args=['{id}'])
 
         existing_user = {
             'username': 'testuser',
@@ -243,12 +244,14 @@ class PostTests(APITestCase):
             'content': 'This is the content of the post.',
             'user': user_id
         }
+
         post_response = self.client.post(post_url, post_data, format='json')
         self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
 
         post_id = post_response.data['id']
-        get_post_url = reverse('get-post', args=[post_id])
-        get_response = self.client.get(get_post_url, format='json')
+
+        get_url = get_post_url.format(id=post_id)
+        get_response = self.client.get(get_url, format='json')
 
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
         self.assertEqual(get_response.data['id'], post_id)
