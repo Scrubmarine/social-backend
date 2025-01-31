@@ -60,6 +60,16 @@ class GetPostView(APIView):
         serializer = PostSerializer(post)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class GetPostsByUserView(APIView):
+    def get(self, request, user_id, *args, **kwargs):
+
+        posts = Post.get_posts_by_user(user_id=user_id)
+        if not posts.exists():
+            return Response({'error': 'Posts not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class CreateCommentView(APIView):
     def post(self, request, *args, **kwargs):
         user_id = request.data.get('user')

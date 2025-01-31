@@ -7,5 +7,6 @@ urlpatterns = [
     path('get-users/', GetAllUsersView.as_view(), name='get-users'),
     path('create-post/', CreatePostView.as_view(), name='create-post'),
     path('get-post/<int:id>/', GetPostView.as_view(), name='get-post'),
+    path('get-posts-by-user/<int:user_id>/', GetPostsByUserView.as_view(), name='get-posts-by-user'),
     path('create-comment/', CreateCommentView.as_view(), name='create-comment')
 ]
