@@ -255,6 +255,52 @@ class PostTests(APITestCase):
         self.assertEqual(get_response.data['content'], 'This is the content of the post.')
         self.assertEqual(get_response.data['user'], user_id)
 
+    def test_get_posts_by_user(self):
+        user_url = reverse('create-user')
+        post_url = reverse('create-post')
+
+        existing_user = {
+            'username': 'testuser',
+            'email': 'test@test.com',
+            'password': 'testpassword',
+            'first_name': 'testfirst',
+            'last_name': 'testlast'
+        }
+        user_response = self.client.post(user_url, existing_user, format='json')
+        self.assertEqual(user_response.status_code, status.HTTP_201_CREATED)
+
+        user_id = user_response.data['id']
+
+        post_data_list = {
+            {
+                'title': 'Test Post Title',
+                'content': 'This is the content of the post.',
+                'user': user_id
+            },
+            {
+                'title': 'Another Test Post Title',
+                'content': 'This is the content of the post 2.',
+                'user': user_id
+            }
+        }
+
+        for post_data in post_data_list:
+            post_response = self.client.post(post_url, post_data, format='json')
+            self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
+
+        get_url = reverse('get-post-by-user', kwargs={'user_id': user_id})
+        get_response = self.client.get(get_url, format='json')
+
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+
+        response_data = get_response.json()
+        self.assertEqual(len(response_data), len(post_data_list))
+
+        for i in range(len(response_data)):
+            self.assertEqual(response_data[i]['title'], post_data_list[i]['title'])
+            self.assertEqual(response_data[i]['content'], post_data_list[i]['content'])
+            self.assertEqual(response_data[i]['user'], post_data_list[i]['user'])
+
 
 class CommentTests(APITestCase):
     def test_create_comment(self):
