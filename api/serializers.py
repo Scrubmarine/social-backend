@@ -20,15 +20,23 @@ class UserSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name'],
             password=password
         )
-        user.save()
         return user
+
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user']
+        fields = ['id', 'title', 'content', 'user', 'created_at']
+        read_only_fields = ['created_at']
+
+    def create(self, validated_data):
+        return Post.objects.create(**validated_data)
+
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'user', 'post']
+        fields = ['id', 'content', 'user', 'post', 'created_at']
+        read_only_fields = ['created_at']
+    def create(self, validated_data):
+        return Comment.objects.create(**validated_data)
