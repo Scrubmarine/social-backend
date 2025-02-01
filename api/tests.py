@@ -303,7 +303,7 @@ class PostTests(APITestCase):
 
 
 class CommentTests(APITestCase):
-    def test_create_comment(self):
+    def setUp(self):
         user_url = reverse('create-user')
         post_url = reverse('create-post')
         comment_url = reverse('create-comment')
@@ -317,33 +317,35 @@ class CommentTests(APITestCase):
         }
 
         user_response = self.client.post(user_url, existing_user, format='json')
+
         self.assertEqual(user_response.status_code, status.HTTP_201_CREATED)
 
-        user_id = user_response.data['id']
+        self.user_id = user_response.data['id']
 
         post_data = {
             'title': 'Test Post Title',
             'content': 'This is the content of the test post.',
-            'user': user_id
+            'user': self.user_id
         }
 
         post_response = self.client.post(post_url, post_data, format='json')
         self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
 
-        post_id = post_response.data['id']
+        self.post_id = post_response.data['id']
 
-        comment_data = {
+        self.comment_data = {
             'content': 'This is a test comment.',
-            'user': user_id,
-            'post': post_id
+            'user': self.user_id,
+            'post': self.post_id
         }
 
-        comment_response = self.client.post(comment_url, comment_data, format='json')
-        self.assertEqual(comment_response.status_code, status.HTTP_201_CREATED)
+        self.comment_response = self.client.post(comment_url, self.comment_data, format='json')
+        self.assertEqual(self.comment_response.status_code, status.HTTP_201_CREATED)
 
-        self.assertEqual(comment_response.data['content'], comment_data['content'])
-        self.assertEqual(comment_response.data['user'], user_id)
-        self.assertEqual(comment_response.data['post'], post_id)
+    def test_create_comment(self):
+        self.assertEqual(self.comment_response.data['content'], self.comment_data['content'])
+        self.assertEqual(self.comment_response.data['user'], self.user_id)
+        self.assertEqual(self.comment_response.data['post'], self.post_id)
 
-        created_at = comment_response.data.get('created_at')
+        created_at = self.comment_response.data.get('created_at')
         self.assertIsNotNone(created_at, "'created_at' not found.")

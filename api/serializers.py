@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        # this line takes out the password and hashes it before passing to create user
+        # pass the password as plaintext so Django can hash it
         password = validated_data.pop('password')
 
         user = User.objects.create_user(
