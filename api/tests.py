@@ -168,10 +168,10 @@ class PostTests(APITestCase):
                 'user': self.user_id
         }
 
-        post_data_list = [self.post_data, post_data]
-
         post_response = self.client.post(self.post_url, post_data, format='json')
         self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
+
+        post_data_list = [self.post_response.data, post_response.data]
 
         get_url = reverse('get-posts-by-user', kwargs={'user_id': self.user_id})
         get_response = self.client.get(get_url, format='json')
