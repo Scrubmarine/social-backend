@@ -4,9 +4,9 @@ from django.urls import reverse
 
 
 class UserTests(APITestCase):
-    def test_create_user(self):
-        url = reverse('create-user')
-        data = {
+    def setUp(self):
+        self.url = reverse('create-user')
+        self.data = {
             'username': 'testuser',
             'email': 'test@test.com',
             'password': 'testpassword',
@@ -14,36 +14,25 @@ class UserTests(APITestCase):
             'last_name': 'testlast'
         }
 
-        response = self.client.post(url, data, format='json')
+        self.response = self.client.post(self.url, self.data, format='json')
+        self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['username'], data['username'])
-        self.assertEqual(response.data['email'], data['email'])
-        self.assertEqual(response.data['first_name'], data['first_name'])
-        self.assertEqual(response.data['last_name'], data['last_name'])
-        self.assertNotIn('password', response.data)
+    def test_create_user(self):
+        self.assertEqual(self.response.data['username'], self.data['username'])
+        self.assertEqual(self.response.data['email'], self.data['email'])
+        self.assertEqual(self.response.data['first_name'], self.data['first_name'])
+        self.assertEqual(self.response.data['last_name'], self.data['last_name'])
+        self.assertNotIn('password', self.response.data)
 
     def test_create_username_already_exists(self):
-        url = reverse('create-user')
-        existing_user = {
-            'username': 'testuser',
-            'email': 'test@test.com',
-            'password': 'testpassword',
-            'first_name': 'testfirst',
-            'last_name': 'testlast'
-        }
-        response = self.client.post(url, existing_user, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['username'], existing_user['username'])
-
-        test_user = {
+        data = {
             'username': 'testuser',
             'email': 'differenttest@test.com',
             'password': 'differenttestpassword',
             'first_name': 'differenttestfirst',
             'last_name': 'differenttestlast'
         }
-        test_response = self.client.post(url, test_user, format='json')
+        test_response = self.client.post(self.url, data, format='json')
 
         self.assertEqual(test_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('username', test_response.data)
@@ -65,27 +54,14 @@ class UserTests(APITestCase):
         self.assertEqual(str(response.data['username'][0]), 'This field may not be blank.')
 
     def test_get_user(self):
-        post_url = reverse('create-user')
-
-        existing_user = {
-            'username': 'testuser',
-            'email': 'test@test.com',
-            'password': 'testpassword',
-            'first_name': 'testfirst',
-            'last_name': 'testlast'
-        }
-
-        post_response = self.client.post(post_url, existing_user, format='json')
-
-        self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
-        user_id = post_response.data['id']
+        user_id = self.response.data.get('id')
 
         get_url = reverse('get-user', kwargs={'id': user_id})
 
         get_response = self.client.get(get_url, format='json')
 
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(get_response.data['username'], existing_user['username'])
+        self.assertEqual(get_response.data['username'], self.response.data.get('username'))
 
     def test_get_user_doesnt_exist(self):
         get_url = reverse('get-user', args=[5])
@@ -93,19 +69,6 @@ class UserTests(APITestCase):
         self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_users(self):
-        post_url = reverse('create-user')
-        get_all_url = reverse('get-users')
-
-        existing_user = {
-            'username': 'testuser',
-            'email': 'test@test.com',
-            'password': 'testpassword',
-            'first_name': 'testfirst',
-            'last_name': 'testlast'
-        }
-        response = self.client.post(post_url, existing_user, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
         existing_user2 = {
             'username': 'testuser2',
             'email': 'test@test.com',
@@ -113,9 +76,10 @@ class UserTests(APITestCase):
             'first_name': 'testfirst',
             'last_name': 'testlast'
         }
-        response2 = self.client.post(post_url, existing_user2, format='json')
+        response2 = self.client.post(self.url, existing_user2, format='json')
         self.assertEqual(response2.status_code, status.HTTP_201_CREATED)
 
+        get_all_url = reverse('get-users')
         get_response = self.client.get(get_all_url, format='json')
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
 
