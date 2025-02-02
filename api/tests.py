@@ -14,15 +14,15 @@ class UserTests(APITestCase):
             'last_name': 'testlast'
         }
 
-        self.response = self.client.post(self.url, self.data, format='json')
-        self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
+        self.post_response = self.client.post(self.url, self.data, format='json')
+        self.assertEqual(self.post_response.status_code, status.HTTP_201_CREATED)
 
     def test_create_user(self):
-        self.assertEqual(self.response.data['username'], self.data['username'])
-        self.assertEqual(self.response.data['email'], self.data['email'])
-        self.assertEqual(self.response.data['first_name'], self.data['first_name'])
-        self.assertEqual(self.response.data['last_name'], self.data['last_name'])
-        self.assertNotIn('password', self.response.data)
+        self.assertEqual(self.post_response.data['username'], self.data['username'])
+        self.assertEqual(self.post_response.data['email'], self.data['email'])
+        self.assertEqual(self.post_response.data['first_name'], self.data['first_name'])
+        self.assertEqual(self.post_response.data['last_name'], self.data['last_name'])
+        self.assertNotIn('password', self.post_response.data)
 
     def test_create_username_already_exists(self):
         data = {
@@ -35,7 +35,6 @@ class UserTests(APITestCase):
         test_response = self.client.post(self.url, data, format='json')
 
         self.assertEqual(test_response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('username', test_response.data)
         self.assertEqual(test_response.data['username'], 'A user with that username already exists.')
 
     def test_create_blank_username(self):
@@ -54,14 +53,12 @@ class UserTests(APITestCase):
         self.assertEqual(str(response.data['username'][0]), 'This field may not be blank.')
 
     def test_get_user(self):
-        user_id = self.response.data.get('id')
-
+        user_id = self.post_response.data.get('id')
         get_url = reverse('get-user', kwargs={'id': user_id})
-
         get_response = self.client.get(get_url, format='json')
 
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(get_response.data['username'], self.response.data.get('username'))
+        self.assertEqual(get_response.data.get('username'), self.post_response.data.get('username'))
 
     def test_get_user_doesnt_exist(self):
         get_url = reverse('get-user', args=[5])
@@ -69,14 +66,14 @@ class UserTests(APITestCase):
         self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_users(self):
-        existing_user2 = {
+        data2 = {
             'username': 'testuser2',
             'email': 'test@test.com',
             'password': 'testpassword',
             'first_name': 'testfirst',
             'last_name': 'testlast'
         }
-        response2 = self.client.post(self.url, existing_user2, format='json')
+        response2 = self.client.post(self.url, data2, format='json')
         self.assertEqual(response2.status_code, status.HTTP_201_CREATED)
 
         get_all_url = reverse('get-users')
@@ -89,11 +86,11 @@ class UserTests(APITestCase):
 
 
 class PostTests(APITestCase):
-    def test_create_post(self):
-        user_url = reverse('create-user')
-        post_url = reverse('create-post')
+    def setUp(self):
+        self.user_url = reverse('create-user')
+        self.post_url = reverse('create-post')
 
-        existing_user = {
+        self.user_data = {
             'username': 'testuser',
             'email': 'test@test.com',
             'password': 'testpassword',
@@ -101,115 +98,60 @@ class PostTests(APITestCase):
             'last_name': 'testlast'
         }
 
-        user_response = self.client.post(user_url, existing_user, format='json')
-        self.assertEqual(user_response.status_code, status.HTTP_201_CREATED)
+        self.user_response = self.client.post(self.user_url, self.user_data, format='json')
+        self.assertEqual(self.user_response.status_code, status.HTTP_201_CREATED)
 
-        user_id = user_response.data['id']
+        self.user_id = self.user_response.data['id']
 
-        post_data = {
-            'title': 'test post title',
-            'content': 'This is the content of the test post.',
-            'user': user_id
+        self.post_data = {
+            'title': 'Test Post Title',
+            'content': 'This is the content of the post.',
+            'user': self.user_id
         }
 
-        post_response = self.client.post(post_url, post_data, format='json')
+        self.post_response = self.client.post(self.post_url, self.post_data, format='json')
+        self.assertEqual(self.post_response.status_code, status.HTTP_201_CREATED)
 
-        self.assertEqual(post_response.data['title'], post_data['title'])
-        self.assertEqual(post_response.data['content'], post_data['content'])
-        self.assertEqual(post_response.data['user'], user_id)
+    def test_create_post(self):
+        self.assertEqual(self.post_response.data['title'], self.post_data['title'])
+        self.assertEqual(self.post_response.data['content'], self.post_data['content'])
+        self.assertEqual(self.post_response.data['user'], self.user_id)
 
-        created_at = post_response.data.get('created_at')
+        created_at = self.post_response.data.get('created_at')
         self.assertIsNotNone(created_at, "'created at' not found.")
 
     def test_create_post_invalid_user(self):
-        post_url = reverse('create-post')
-
         post_data = {
             'title': 'Test Post Title',
             'content': 'Test content.',
             'user': 5
         }
-        response = self.client.post(post_url, post_data, format='json')
+
+        response = self.client.post(self.post_url, post_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('user', response.data)
 
     def test_create_post_no_title(self):
-        user_url = reverse('create-user')
-        post_url = reverse('create-post')
-
-        existing_user = {
-            'username': 'testuser',
-            'email': 'test@test.com',
-            'password': 'testpassword',
-            'first_name': 'testfirst',
-            'last_name': 'testlast'
-        }
-
-        user_response = self.client.post(user_url, existing_user, format='json')
-        self.assertEqual(user_response.status_code, status.HTTP_201_CREATED)
-
-        user_id = user_response.data['id']
-
         post_data = {
             'content': 'Test content',
-            'user': user_id
+            'user': self.user_id
         }
-        response = self.client.post(post_url, post_data, format='json')
+        response = self.client.post(self.post_url, post_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(str(response.data['title'][0]), 'This field is required.')
 
     def test_create_post_no_content(self):
-        user_url = reverse('create-user')
-        post_url = reverse('create-post')
-
-        existing_user = {
-            'username': 'testuser',
-            'email': 'test@test.com',
-            'password': 'testpassword',
-            'first_name': 'testfirst',
-            'last_name': 'testlast'
-        }
-
-        user_response = self.client.post(user_url, existing_user, format='json')
-        self.assertEqual(user_response.status_code, status.HTTP_201_CREATED)
-
-        user_id = user_response.data['id']
-
         post_data = {
             'title': 'Test Title',
-            'user': user_id
+            'user': self.user_id
         }
-        response = self.client.post(post_url, post_data, format='json')
+        response = self.client.post(self.post_url, post_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('content', response.data)
         self.assertEqual(response.data['content'][0], 'This field is required.')
 
     def test_get_post(self):
-        user_url = reverse('create-user')
-        post_url = reverse('create-post')
-
-        existing_user = {
-            'username': 'testuser',
-            'email': 'test@test.com',
-            'password': 'testpassword',
-            'first_name': 'testfirst',
-            'last_name': 'testlast'
-        }
-        user_response = self.client.post(user_url, existing_user, format='json')
-        self.assertEqual(user_response.status_code, status.HTTP_201_CREATED)
-
-        user_id = user_response.data['id']
-
-        post_data = {
-            'title': 'Test Post Title',
-            'content': 'This is the content of the post.',
-            'user': user_id
-        }
-
-        post_response = self.client.post(post_url, post_data, format='json')
-        self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
-
-        post_id = post_response.data['id']
+        post_id = self.post_response.data.get('id')
         get_url = reverse('get-post', kwargs={'id': post_id})
         get_response = self.client.get(get_url, format='json')
 
@@ -217,48 +159,27 @@ class PostTests(APITestCase):
         self.assertEqual(get_response.data['id'], post_id)
         self.assertEqual(get_response.data['title'], 'Test Post Title')
         self.assertEqual(get_response.data['content'], 'This is the content of the post.')
-        self.assertEqual(get_response.data['user'], user_id)
+        self.assertEqual(get_response.data['user'], self.user_id)
 
     def test_get_posts_by_user(self):
-        user_url = reverse('create-user')
-        post_url = reverse('create-post')
-
-        existing_user = {
-            'username': 'testuser',
-            'email': 'test@test.com',
-            'password': 'testpassword',
-            'first_name': 'testfirst',
-            'last_name': 'testlast'
-        }
-        user_response = self.client.post(user_url, existing_user, format='json')
-        self.assertEqual(user_response.status_code, status.HTTP_201_CREATED)
-
-        user_id = user_response.data['id']
-
-        post_data_list = [
-            {
-                'title': 'Test Post Title',
-                'content': 'This is the content of the post.',
-                'user': user_id
-            },
-            {
+        post_data = {
                 'title': 'Another Test Post Title',
                 'content': 'This is the content of the post 2.',
-                'user': user_id
-            }
-        ]
+                'user': self.user_id
+        }
 
-        for post_data in post_data_list:
-            post_response = self.client.post(post_url, post_data, format='json')
-            self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
+        post_data_list = [self.post_data, post_data]
 
-        get_url = reverse('get-posts-by-user', kwargs={'user_id': user_id})
+        post_response = self.client.post(self.post_url, post_data, format='json')
+        self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
+
+        get_url = reverse('get-posts-by-user', kwargs={'user_id': self.user_id})
         get_response = self.client.get(get_url, format='json')
 
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
 
         response_data = get_response.json()
-        self.assertEqual(len(response_data), len(post_data_list))
+        self.assertEqual(len(response_data), 2)
 
         for i in range(len(response_data)):
             self.assertEqual(response_data[i]['title'], post_data_list[i]['title'])
